@@ -7,34 +7,17 @@
 
 import SwiftUI
 
-struct ChatView: View {
-    @ObservedObject var viewModel: ChatManagerViewModel
-    let chatTitle: String
+struct ChatListView: View {
+    @StateObject var viewModel = ChatViewModel()
 
     var body: some View {
-        VStack {
-            Text("Chat: \(chatTitle)")
-                .font(.headline)
-                .padding()
-
-            ScrollView {
-                Text(viewModel.responseText)
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-            }
-            .padding()
-
-            HStack {
-                TextField("Enter your text...", text: $viewModel.inputText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                Button("Send") {
-                    viewModel.sendMessage()
+        NavigationView {
+            List(viewModel.chats) { chat in
+                NavigationLink(destination: ChatDetailView(viewModel: viewModel, chat: chat)) {
+                    Text(chat.title)
                 }
-                .padding()
             }
+            .navigationTitle("Available Chats")
         }
     }
 }

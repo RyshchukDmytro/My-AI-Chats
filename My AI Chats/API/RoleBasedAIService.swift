@@ -11,7 +11,7 @@ class RoleBasedAIService {
     private let apiKey = APIKeyManager.shared.openAIKey ?? ""
 
     func getResponse(for input: String, role: String, completion: @escaping (String?) -> Void) {
-        guard let url = URL(string: "https://api.openai.com/v1/completions") else { return }
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -19,9 +19,12 @@ class RoleBasedAIService {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body: [String: Any] = [
-            "model": "text-davinci-003",
-            "prompt": input,
-            "max_tokens": 200,
+            "model": "gpt-4o-mini",
+            "messages": [
+                ["role": "system", "content": role],
+                ["role": "user", "content": input]
+            ],
+            "max_tokens": 100,
             "temperature": 0.7
         ]
 
@@ -34,18 +37,23 @@ class RoleBasedAIService {
                 return
             }
 
-            guard let data = data else { return }
+            guard let data = data else {
+                print("No data received.")
+                completion(nil)
+                return
+            }
+
+            #if DEBUG
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Raw JSON: \(jsonString)")
+            }
+            #endif
+
             if let response = try? JSONDecoder().decode(OpenAIResponse.self, from: data) {
-                completion(response.choices.first?.text.trimmingCharacters(in: .whitespacesAndNewlines))
+                completion(response.choices.first?.message.content.trimmingCharacters(in: .whitespacesAndNewlines))
+            } else {
+                completion(nil)
             }
         }.resume()
-    }
-}
-
-struct OpenAIResponse: Decodable {
-    let choices: [Choice]
-
-    struct Choice: Decodable {
-        let text: String
     }
 }
