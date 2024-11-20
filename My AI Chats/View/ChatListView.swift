@@ -1,5 +1,5 @@
 //
-//  ChatView.swift
+//  ChatListView.swift
 //  My AI Chats
 //
 //  Created by Dmytro Ryshchuk on 11/19/24.

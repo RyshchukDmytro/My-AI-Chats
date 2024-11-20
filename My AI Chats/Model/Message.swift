@@ -7,8 +7,12 @@
 
 import Foundation
 
-struct Message: Identifiable {
+struct Message: Identifiable, Equatable {
     let id = UUID()
     let role: String
     let content: String
+    
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
